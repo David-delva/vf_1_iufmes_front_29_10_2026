@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import api from '@/lib/api';
+import api, { ensureCsrfCookie } from '@/lib/api';
 import { useState } from 'react';
 import { Send, CheckCircle, AlertCircle, User, Mail, Phone, MessageSquare } from 'lucide-react';
 
@@ -32,6 +32,7 @@ export default function ContactForm() {
   const onSubmit = async (data: ContactFormData) => {
     setStatus('loading');
     try {
+      await ensureCsrfCookie();
       await api.post('/contact', data);
       setStatus('success');
       reset();

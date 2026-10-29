@@ -3,23 +3,33 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { ContactMessage } from '@/types';
-import { Mail, Phone, Calendar, LogIn, AlertCircle, Newspaper, MessageSquare } from 'lucide-react';
+import { Mail, Phone, Calendar, LogIn, AlertCircle, Newspaper, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+}
 
 export default function AdminDashboard() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetchMessages();
-  }, []);
+    fetchMessages(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (targetPage: number) => {
     try {
-      const response = await api.get('/contact');
-      setMessages(response.data.messages);
+      const response = await api.get('/contact', { params: { page: targetPage } });
+      setMessages(response.data.data);
+      setMeta(response.data.meta ?? null);
       setError(null);
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -36,7 +46,7 @@ export default function AdminDashboard() {
   const updateStatus = async (id: number, status: string) => {
     try {
       await api.patch(`/contact/${id}`, { status });
-      fetchMessages();
+      fetchMessages(page);
     } catch (error) {
       console.error('Error updating status:', error);
     }
@@ -72,7 +82,7 @@ export default function AdminDashboard() {
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold mb-8 text-primary-800">Dashboard Admin</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <button
           onClick={() => router.push('/admin/news')}
@@ -88,7 +98,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </button>
-        
+
         <div className="bg-gradient-to-r from-accent to-accent-600 text-gray-900 p-6 rounded-2xl shadow-lg">
           <div className="flex items-center gap-4">
             <div className="bg-white/30 p-4 rounded-xl">
@@ -96,12 +106,12 @@ export default function AdminDashboard() {
             </div>
             <div className="text-left">
               <h2 className="text-2xl font-bold mb-1">Messages</h2>
-              <p className="text-gray-800">{messages.length} message(s) reçu(s)</p>
+              <p className="text-gray-800">{meta?.total ?? messages.length} message(s) reçu(s)</p>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -171,6 +181,30 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         </div>
+
+        {meta && meta.last_page > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+            <span className="text-sm text-gray-500">
+              Page {meta.current_page} / {meta.last_page} ({meta.total} au total)
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={meta.current_page <= 1}
+                className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={meta.current_page >= meta.last_page}
+                className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {messages.length === 0 && (

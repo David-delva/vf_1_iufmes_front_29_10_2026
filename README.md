@@ -1,110 +1,128 @@
-# IUFMES - Frontend
+IUFMES — Frontend
 
-Site web officiel de l'Institut Universitaire de Formation aux Métiers de l'Éducation et de la Santé.
+Ce dépôt contient le frontend du site officiel de l'Institut Universitaire de Formation aux Métiers de l'Éducation et de la Santé. L'objectif : une vitrine moderne, accessible et entièrement connectée au backend pour gérer les programmes, les admissions et les messages de contact.
 
-## 🚀 Technologies
+Tech stack
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Icônes**: Lucide React
-- **Formulaires**: React Hook Form + Zod
-- **HTTP Client**: Axios
+Framework : Next.js 14 (App Router)
 
-## 📁 Structure
+Langage : TypeScript
 
-```
+Styling : Tailwind CSS
+
+Icônes : Lucide React
+
+Formulaires : React Hook Form + Zod
+
+HTTP client : Axios
+
+Arborescence principale
 src/
-├── app/                          # Pages Next.js (App Router)
-│   ├── about/                    # Page À propos
-│   ├── admin/                    # Dashboard admin
-│   │   └── login/                # Page de connexion admin
-│   ├── admissions/               # Page Admissions & Tarifs
-│   ├── contact/                  # Page Contact
-│   ├── programs/                 # Pages Programmes
-│   │   └── [slug]/               # Page détail programme (dynamique)
-│   ├── team/                     # Page Équipe
-│   ├── mentions-legales/         # Mentions légales
-│   ├── politique-confidentialite/ # Politique de confidentialité
-│   ├── layout.tsx                # Layout principal
-│   ├── page.tsx                  # Page d'accueil
-│   └── not-found.tsx             # Page 404
+├── app/
+│   ├── about/
+│   ├── admin/
+│   │   └── login/
+│   ├── admissions/
+│   ├── contact/
+│   ├── programs/
+│   │   └── [slug]/
+│   ├── team/
+│   ├── mentions-legales/
+│   ├── politique-confidentialite/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── not-found.tsx
 ├── components/
 │   ├── layout/
-│   │   ├── Navbar.tsx            # Navigation principale
-│   │   └── Footer.tsx            # Pied de page
-│   ├── sections/                 # Sections réutilisables
-│   │   ├── Hero.tsx              # Section hero
-│   │   ├── Stats.tsx             # Statistiques
-│   │   ├── ProgramCards.tsx      # Cartes programmes
-│   │   ├── About.tsx             # Section à propos
-│   │   ├── Team.tsx              # Équipe (pyramide hiérarchique)
-│   │   ├── Stages.tsx            # Lieux de stages
-│   │   ├── Partners.tsx          # Partenaires
-│   │   ├── Contact.tsx           # Section contact
-│   │   ├── Admissions.tsx        # Tarifs et admissions
-│   │   └── VideoModal.tsx        # Modal vidéo
-│   └── ContactForm.tsx           # Formulaire de contact
+│   │   ├── Navbar.tsx
+│   │   └── Footer.tsx
+│   ├── sections/
+│   │   ├── Hero.tsx
+│   │   ├── Stats.tsx
+│   │   ├── ProgramCards.tsx
+│   │   ├── About.tsx
+│   │   ├── Team.tsx
+│   │   ├── Stages.tsx
+│   │   ├── Partners.tsx
+│   │   ├── Contact.tsx
+│   │   ├── Admissions.tsx
+│   │   └── VideoModal.tsx
+│   └── ContactForm.tsx
 ├── lib/
-│   ├── api.ts                    # Client Axios configuré
-│   └── utils.ts                  # Utilitaires
+│   ├── api.ts
+│   └── utils.ts
 └── types/
-    └── index.ts                  # Types TypeScript
+    └── index.ts
+Pages disponibles
+Publiques
 
-```
+/ — Accueil (Hero, Stats, Programmes, À propos, Équipe, Stages, Partenaires, Contact)
 
-## 🎨 Pages Disponibles
+/about — À propos
 
-### Pages Publiques
-- `/` - Page d'accueil (Hero, Stats, Programmes, À propos, Équipe, Stages, Partenaires, Contact)
-- `/about` - À propos de l'IUFMES
-- `/programs` - Liste des filières
-- `/programs/[slug]` - Détail d'un programme (dynamique, connecté au backend)
-- `/team` - Notre équipe (structure pyramidale)
-- `/admissions` - Tarifs et procédure d'inscription
-- `/contact` - Formulaire de contact
-- `/mentions-legales` - Mentions légales
-- `/politique-confidentialite` - Politique de confidentialité
+/programs — Liste des filières
 
-### Pages Admin
-- `/admin/login` - Connexion administrateur
-- `/admin` - Dashboard (gestion des messages de contact)
+/programs/[slug] — Détail d'un programme (page dynamique, alimentée par le backend)
 
-### Pages Système
-- `/not-found` - Page 404 personnalisée
+/team — Notre équipe (présentation en pyramide hiérarchique)
 
-## 🔌 Connexion Backend
+/admissions — Tarifs et procédure d'inscription
 
-Le frontend communique avec le backend via Axios :
+/contact — Formulaire de contact
 
-### Endpoints utilisés
-- `GET /api/programs` - Liste des programmes (ProgramCards)
-- `GET /api/programs/:slug` - Détail d'un programme
-- `POST /api/contact` - Envoi de message de contact
-- `POST /api/auth/login` - Connexion admin
-- `GET /api/contact` - Liste des messages (admin)
-- `PATCH /api/contact/:id` - Mise à jour statut message (admin)
+/mentions-legales — Mentions légales
 
-### Configuration
-Fichier `.env.local` :
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
+/politique-confidentialite — Politique de confidentialité
 
-## 🎨 Design System
+Admin
 
-### Couleurs
-- **Primary**: `#00337a` (Bleu profond)
-- **Secondary**: `#0066cc` (Bleu clair)
-- **Accent**: `#00e68a` (Vert menthe)
+/admin/login — Connexion administrateur
 
-### Typographie
-- Police: Inter (Google Font)
-- Tailles: Responsive avec Tailwind
+/admin — Dashboard (gestion des messages de contact)
 
-## 🚀 Commandes
+Système
 
-```bash
+/not-found — Page 404 personnalisée
+
+Connexion au backend
+
+Le frontend communique avec l'API via Axios.
+
+Endpoints utilisés
+
+GET /api/programs — liste des programmes (affichées dans ProgramCards)
+
+GET /api/programs/:slug — détail d'un programme
+
+POST /api/contact — envoi d'un message de contact
+
+POST /api/auth/login — authentification admin
+
+GET /api/contact — récupération des messages (admin)
+
+PATCH /api/contact/:id — mise à jour du statut d'un message (admin)
+
+Configuration
+
+Dans .env.local :
+
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+Design system
+Couleurs
+
+Primary : #00337a (bleu profond)
+
+Secondary : #0066cc (bleu clair)
+
+Accent : #00e68a (vert menthe)
+
+Typographie
+
+Police : Inter (Google Fonts)
+
+Tailles : gérées de façon responsive avec Tailwind
+
+Commandes
 # Développement
 npm run dev
 
@@ -116,35 +134,39 @@ npm start
 
 # Linter
 npm run lint
-```
+Fonctionnalités notables
+Accessibilité
 
-## ✨ Fonctionnalités
+Navigation clavier optimisée
 
-### Accessibilité
-- Navigation au clavier
-- Skip to main content
-- Contraste WCAG AA
-- Attributs ARIA
+Lien « skip to main content »
 
-### SEO
-- Métadonnées optimisées
-- Sitemap automatique
-- URLs propres (slugs)
+Contraste conforme WCAG AA
 
-### Performance
-- Images optimisées (Next.js Image)
-- Code splitting automatique
-- Lazy loading
+Attributs ARIA pertinents
 
-### Responsive
-- Mobile-first design
-- Breakpoints Tailwind
-- Menu hamburger mobile
+SEO
 
-## 📝 Notes
+Métadonnées optimisées pour chaque page
 
-- Les programmes sont maintenant **dynamiques** (récupérés depuis le backend)
-- L'équipe est affichée en **pyramide hiérarchique**
-- Toutes les pages sont **complètes et fonctionnelles**
-- Le site est **100% responsive**
-- **SEO optimisé** avec métadonnées sur toutes les pages
+Sitemap automatique
+
+URLs propres (slugs lisibles)
+
+Performance & responsive
+
+Images optimisées avec Next.js Image
+
+Code splitting et lazy loading
+
+Mobile-first, menu hamburger, breakpoints Tailwind
+
+Notes rapides
+
+Les programmes sont dynamiques : les pages détails sont alimentées par le backend.
+
+L’équipe est affichée sous forme de pyramide hiérarchique.
+
+Toutes les pages sont complètes, fonctionnelles et 100 % responsive.
+
+SEO et accessibilité pris en compte sur l’ensemble du site.

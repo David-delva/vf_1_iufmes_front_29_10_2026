@@ -1,17 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Calendar, Tag } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Plus, Edit, Trash2, Calendar, Tag, ChevronLeft, ChevronRight, Upload, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 
 interface News {
   id: number;
   title: string;
   excerpt: string;
+  content?: string;
+  imageUrl?: string;
   category: string;
   status: string;
   publishedAt?: string;
   createdAt: string;
+}
+
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -37,9 +45,13 @@ const statusColors: Record<string, string> = {
 
 export default function AdminNewsPage() {
   const [news, setNews] = useState<News[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingNews, setEditingNews] = useState<News | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
@@ -50,17 +62,39 @@ export default function AdminNewsPage() {
   });
 
   useEffect(() => {
-    fetchNews();
-  }, []);
+    fetchNews(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
-  const fetchNews = async () => {
+  const fetchNews = async (targetPage: number) => {
     try {
-      const response = await api.get('/news/admin/all');
+      const response = await api.get('/news/admin/all', { params: { page: targetPage } });
       setNews(response.data.data);
+      setMeta(response.data.meta ?? null);
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append('image', file);
+      const response = await api.post('/news/image', body, {
+        headers: { 'Content-Type': undefined },
+      });
+      setFormData((prev) => ({ ...prev, imageUrl: response.data.url }));
+    } catch (error) {
+      console.error('Erreur upload image:', error);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -75,7 +109,7 @@ export default function AdminNewsPage() {
       setShowForm(false);
       setEditingNews(null);
       resetForm();
-      fetchNews();
+      fetchNews(page);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -86,8 +120,8 @@ export default function AdminNewsPage() {
     setFormData({
       title: item.title,
       excerpt: item.excerpt,
-      content: '',
-      imageUrl: '',
+      content: item.content || '',
+      imageUrl: item.imageUrl || '',
       category: item.category,
       status: item.status,
     });
@@ -98,7 +132,7 @@ export default function AdminNewsPage() {
     if (!confirm('Supprimer cette actualité ?')) return;
     try {
       await api.delete(`/news/${id}`);
-      fetchNews();
+      fetchNews(page);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -148,7 +182,7 @@ export default function AdminNewsPage() {
                 {editingNews ? 'Modifier l\'actualité' : 'Nouvelle actualité'}
               </h2>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Titre *</label>
@@ -184,13 +218,35 @@ export default function AdminNewsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">URL de l'image</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Image</label>
+                <div className="flex items-center gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-xl hover:border-primary transition disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {uploading ? 'Envoi...' : 'Choisir un fichier'}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  {formData.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={formData.imageUrl} alt="Aperçu" className="w-12 h-12 object-cover rounded-lg border border-gray-200" />
+                  )}
+                </div>
                 <input
                   type="url"
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="ou collez une URL d'image"
                 />
               </div>
 
@@ -308,6 +364,30 @@ export default function AdminNewsPage() {
               ))}
             </tbody>
           </table>
+
+          {meta && meta.last_page > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+              <span className="text-sm text-gray-500">
+                Page {meta.current_page} / {meta.last_page} ({meta.total} au total)
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={meta.current_page <= 1}
+                  className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                  disabled={meta.current_page >= meta.last_page}
+                  className="p-2 border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

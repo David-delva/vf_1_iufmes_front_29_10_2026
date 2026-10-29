@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import api from '@/lib/api';
+import api, { ensureCsrfCookie } from '@/lib/api';
 import { LogIn, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -32,14 +32,10 @@ export default function AdminLogin() {
     setLoading(true);
     setError(null);
     try {
-      console.log('Tentative de connexion avec:', data);
-      console.log('Appel de l\'API à l\'URL :', api.defaults.baseURL + '/auth/login');
-      const response = await api.post('/auth/login', data);
-      console.log('Réponse:', response);
+      await ensureCsrfCookie();
+      await api.post('/auth/login', data);
       router.push('/admin');
     } catch (err: any) {
-      console.error('Erreur de connexion:', err);
-      console.error('Détails:', err.response);
       setError(err.response?.data?.message || err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
@@ -97,12 +93,15 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-          <p className="text-xs text-gray-600 text-center mb-2">Identifiants par défaut :</p>
-          <p className="text-sm text-gray-700 text-center font-mono">admin@healthuniversity.edu</p>
-          <p className="text-sm text-gray-700 text-center font-mono">Admin@2024</p>
-        </div>
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+            <p className="text-xs text-gray-600 text-center mb-2">Identifiants par défaut (dev uniquement) :</p>
+            <p className="text-sm text-gray-700 text-center font-mono">admin@healthuniversity.edu</p>
+            <p className="text-sm text-gray-700 text-center font-mono">Admin@2024</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

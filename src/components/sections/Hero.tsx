@@ -37,7 +37,7 @@ export default function Hero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-accent/20 border border-accent/50 rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 bg-accent rounded-full animate-pulse" aria-hidden="true"></span>
-              <span className="text-sm font-semibold text-accent">Admissions 2024 ouvertes</span>
+              <span className="text-sm font-semibold text-accent">Admissions 2017 ouvertes</span>
             </div>
 
             {/* Titre principal */}
